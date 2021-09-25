@@ -25,9 +25,20 @@ var budgetController=(function()
     totals:{
       exp:0,
       inc:0
-    }
+    },
+    budget:0,
+    percentage:-1
   };
 
+  var calculateTotal= function(type)
+  {
+    let sum=0;
+    data.allitems[type].forEach(function(cur)
+    {
+        sum= sum+cur.value;
+    });
+    data.totals[type]=sum;
+  };
 
   return{
         addItem:function(type,description,value)
@@ -67,10 +78,40 @@ var budgetController=(function()
           return newItem;
         },
 
+        calculateBudget: function()
+        {
+          // calculate total income and expense
+          calculateTotal('inc');
+          calculateTotal('exp');
+
+          // calculat the income - expense
+          data.budget= data.totals.inc - data.totals.exp;
+
+          // calculate the percentage of income that we used
+          if(data.totals.inc>0)
+          {
+            data.percentage = Math.round((data.totals.exp/data.totals.inc)*100);
+          }
+          else
+          {
+            data.percentage=-1;
+          }
+        },
+
         // Testing purpose
         testing:function()
         {
           console.log(this.data)
+        },
+
+        getBudget:function()
+        {
+          return{
+            budget:data.budget,
+            totalInc: data.totals.inc,
+            totalExp: data.totals.exp,
+            percentage: data.percentage
+          }
         }
   };
 })();
@@ -184,6 +225,18 @@ var Controller=(function(budgetCtrl,UICtrl)
         });
     };
 
+    var updateBudget=function()
+    {
+      // 1: Calculate the budget
+      budgetCtrl.calculateBudget();
+
+      // 2: Return budget
+      var budget = budgetCtrl.getBudget();
+      console.log(budget);
+
+      // 3: Display the budget on the UI
+    };
+
     var ctrlAddItem = function()
     {
             var input, newItem;
@@ -192,20 +245,22 @@ var Controller=(function(budgetCtrl,UICtrl)
             input = UICtrl.getInput();
             // console.log(input);
 
-            // 2: Add item to budget controller
-            newItem =budgetCtrl.addItem(input.type, input.description,input.value);
-            // console.log(newItem);
-            // budgetCtrl.testing();
+            if(input.description!=="" && !isNaN(input.value) && input.value>0)
+            {
+              // 2: Add item to budget controller
+              newItem =budgetCtrl.addItem(input.type, input.description,input.value);
+              // console.log(newItem);
+              // budgetCtrl.testing();
 
-            // 3: Add the item to the UI
-            UICtrl.addListItem(newItem,input.type);  
+              // 3: Add the item to the UI
+              UICtrl.addListItem(newItem,input.type);  
 
-            //4: clear the fields
-            UICtrl.clearFields();
+              //4: Clear the fields
+              UICtrl.clearFields();
 
-            // 4: Calculate the budget
-
-            // 5: Display the budget on the UI
+              //5: Calculate Update budget
+              updateBudget();
+            }
 
     };
     return{
