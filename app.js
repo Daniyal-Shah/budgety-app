@@ -133,6 +133,22 @@ var UIController = (function () {
         document.querySelector(element).insertAdjacentHTML('beforeend',newHtml);
       },
 
+      clearFields: function()
+      {
+        var fields, fieldsArr;
+        //To clear multiple fields
+        fields= document.querySelectorAll(DOMStrings.inputDescription+','+DOMStrings.inputValue);
+        fieldsArr=Array.prototype.slice.call(fields);
+
+        fieldsArr.forEach( function(current,index,array)
+        {
+            current.value="";
+        });
+
+          //Focus back to description input
+          fieldsArr[0].focus();
+      },
+
       //To get domStrings object
       getDOMstrings:function()
       {
@@ -174,15 +190,19 @@ var Controller=(function(budgetCtrl,UICtrl)
 
             // 1: Get field input
             input = UICtrl.getInput();
-            console.log(input);
+            // console.log(input);
 
             // 2: Add item to budget controller
             newItem =budgetCtrl.addItem(input.type, input.description,input.value);
-            console.log(newItem);
-            budgetCtrl.testing();
+            // console.log(newItem);
+            // budgetCtrl.testing();
 
             // 3: Add the item to the UI
             UICtrl.addListItem(newItem,input.type);  
+
+            //4: clear the fields
+            UICtrl.clearFields();
+
             // 4: Calculate the budget
 
             // 5: Display the budget on the UI
